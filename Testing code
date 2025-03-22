@@ -1,0 +1,405 @@
+package project;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestContext;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+public class App {
+	WebDriver driver;
+	public static void takeScreenshot(WebDriver driver, String filePath) {
+        // Cast driver to TakesScreenshot
+        TakesScreenshot ts = (TakesScreenshot) driver;
+        
+        // Capture the screenshot as a File
+        File srcFile = ts.getScreenshotAs(OutputType.FILE);
+        
+        // Define the destination file
+        File destFile = new File(filePath);
+        
+        try {
+            // Copy the screenshot to the specified location
+            FileUtils.copyFile(srcFile, destFile);
+            System.out.println("Screenshot saved at: " + filePath);
+        } catch (IOException e) {
+            System.out.println("Failed to save screenshot: " + e.getMessage());
+        }
+    }
+
+
+	@BeforeSuite
+	void start() {
+		System.out.println("Testing was Started");
+		
+	}
+	@AfterSuite
+	void end() {
+		System.out.println("Testing was Ended");
+	}
+	
+	@BeforeTest
+	void openwebsite(ITestContext context) {
+		//Chrome Browser was launched
+		driver = new ChromeDriver();
+		System.out.println("ChromeBrowser was launched");
+		
+		//website was opened
+		driver.get("https://o2.openmrs.org/openmrs/login.htm");
+		System.out.println("Website was opened");
+		//maximize the window
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		 // Take a screenshot
+
+        
+        takeScreenshot(driver, "screenshot1.png");
+
+		
+	}
+	@AfterTest
+	void close() throws InterruptedException {
+	
+			
+			driver.quit();
+			System.out.println("Website was closed... ");
+
+	}
+	@BeforeMethod
+	void login(ITestContext context) {
+			//Login using valid login credentials
+		 	WebElement usernameField = driver.findElement(By.id("username"));
+	        WebElement passwordField = driver.findElement(By.id("password"));
+	        System.out.println("Login using valid login credentials was executed");
+	        
+	        WebElement location = driver.findElement(By.xpath("//li[@id='Inpatient Ward']"));
+	        WebElement loginButton = driver.findElement(By.xpath("//input[@type='submit']"));
+	        
+	        usernameField.sendKeys("Admin");
+	        passwordField.sendKeys("Admin123");
+
+	        // Take a screenshot
+	        
+	        takeScreenshot(driver, "screenshot2.png");
+
+	        
+	     
+	        location.click();
+	        loginButton.click();
+	       
+	 }
+	@AfterMethod
+	void logout() throws InterruptedException {
+		Thread.sleep(25000);
+		//Logout from Webpage
+		driver.findElement(By.xpath("//*[@id=\"navbarSupportedContent\"]/ul/li[3]/a")).click();
+    	System.out.println("logout to webpage");
+
+        // Take a screenshot
+        
+        takeScreenshot(driver, "screenshot3.png");
+
+	}
+	
+	@AfterClass
+	void asertpassword() throws InterruptedException {
+		//validation of password
+		//valid username and password
+		WebElement usernameField = driver.findElement(By.id("username"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+        System.out.println("Login using valid login credentials was executed");
+        
+        WebElement location = driver.findElement(By.xpath("//li[@id='Inpatient Ward']"));
+        WebElement loginButton = driver.findElement(By.xpath("//input[@type='submit']"));
+        
+        usernameField.sendKeys("Admin");
+        passwordField.sendKeys("Admin123");
+        //show password icon was clicked
+        driver.findElement(By.xpath("//i[@class='fa fa-eye']")).click();
+        takeScreenshot(driver, "screenshot4.png");
+        //get text from password field
+        String text = driver.findElement(By.id("password")).getText();
+        //validate the entered password
+        if(text.equals("Admin123")) {
+        	System.out.println("true");
+        }
+        else {
+        	System.out.println("False");
+        	
+        }
+        passwordField.clear();
+        passwordField.sendKeys("Admin100");
+        System.out.println("Negative scenario was executed");
+        location.click();
+        loginButton.click();
+
+        // Take a screenshot
+        
+        takeScreenshot(driver, "screenshot4.png");
+
+        Thread.sleep(3000);
+		
+	}
+	@Test(priority=1)
+	void loginvalidation() {
+		
+		System.out.println("Scenario 1 was executed ......");
+		
+	}
+	
+	//Scenario 2: Register a Patient 
+	@Test(priority=2)
+	void RegisterPatient() throws InterruptedException {
+		//click on register page and it navigate to register page
+		WebElement register = driver.findElement(By.xpath("//*[@id=\"referenceapplication-registrationapp-registerPatient-homepageLink-referenceapplication-registrationapp-registerPatient-homepageLink-extension\"]"));
+		register.click();
+		//enter the details for registration
+		WebElement name = driver.findElement(By.xpath("//input[@name='givenName']"));
+		name.sendKeys("Abhi");
+		WebElement midname=driver.findElement(By.xpath("//input[@name='middleName']"));
+		midname.sendKeys("shek");
+		WebElement famname=driver.findElement(By.xpath("//input[@name='familyName']"));
+		famname.sendKeys("family");
+		Thread.sleep(3000);
+
+		WebElement next = driver.findElement(By.xpath("//button[@class='confirm right']"));
+		next.click();
+		
+		//Gender
+		WebElement gender = driver.findElement(By.xpath("//*[@id=\"gender-field\"]/option[1]"));
+		gender.click();
+		Thread.sleep(3000);
+		WebElement next1 = driver.findElement(By.xpath("//button[@class='confirm right']"));
+		next1.click();
+		
+		//D.O.B 
+		WebElement date = driver.findElement(By.xpath("//input[@name='birthdateDay']"));
+		date.sendKeys("21");
+		WebElement year = driver.findElement(By.xpath("//input[@name='birthdateYear']"));
+		year.sendKeys("2003");
+		
+		//month dropdown
+		WebElement dropdown = driver.findElement(By.xpath("//select[@name='birthdateMonth']"));
+	       
+        Select dropdown1 = new Select(dropdown);
+
+        List<WebElement> options = dropdown1.getOptions();
+      
+        for (WebElement option : options) {
+            if (option.getText().equals("July")) { 
+                option.click();
+                break;
+            }
+        }
+        System.out.println("Month was selected");
+        Thread.sleep(3000);
+        WebElement next2 = driver.findElement(By.xpath("//button[@class='confirm right']"));
+		next2.click();
+		
+		//address
+		WebElement address = driver.findElement(By.xpath("//input[@id='address1']"));
+		address.sendKeys("5/370 8th cross street");
+		WebElement address2 = driver.findElement(By.xpath("//input[@id='address1']"));
+		address2.sendKeys("Thillai Nagar");
+		WebElement city = driver.findElement(By.xpath("//input[@id='address1']"));
+		city.sendKeys("Trichy");
+		WebElement state = driver.findElement(By.xpath("//input[@id='stateProvince']"));
+		state.sendKeys("TamilNadu");
+		WebElement country = driver.findElement(By.xpath("//input[@id='country']"));
+		country.sendKeys("India");
+		WebElement code = driver.findElement(By.xpath("//input[@id='postalCode']"));
+		code.sendKeys("600001");
+		WebElement next3 = driver.findElement(By.xpath("//button[@class='confirm right']"));
+		next3.click();
+		
+		
+		//Phone Number
+		WebElement number = driver.findElement(By.xpath("//input[@name='phoneNumber']"));
+		number.sendKeys("1234567890");
+		WebElement next4 = driver.findElement(By.xpath("//button[@class='confirm right']"));
+		next4.click();
+		
+		//Relatives
+		WebElement relative = driver.findElement(By.xpath("//select[@id='relationship_type']"));
+		Select dropdown2= new Select(relative);
+		//dropdown2.getOptions();
+		List<WebElement> options1 = dropdown2.getOptions();
+		for(WebElement optionall:options1) {
+			if(optionall.getText().equals("Sibling")) {
+				optionall.click();
+				break;
+			}
+		}
+		WebElement person_name = driver.findElement(By.xpath("//input[@placeholder='Person Name']"));
+		person_name.sendKeys("sidhu");
+		next4.click();
+		
+		//confirm and register the patient
+		WebElement confirm = driver.findElement(By.xpath("//input[@class='submitButton confirm right']"));
+		confirm.click();
+		
+	
+
+        // Take a screenshot
+        
+        takeScreenshot(driver, "screenshot5.png");
+
+    	
+		System.out.println("Scenario 2 was executed ......");
+
+		
+	}
+		//scenario - 3  Search a Patient
+	    @Test(priority=3)
+	    void SearchPatient() {
+	    	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(25));
+	    	
+	    	
+	    	//click on find patient
+	    	WebElement record = wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(By.xpath("//a[@id='coreapps-activeVisitsHomepageLink-coreapps-activeVisitsHomepageLink-extension']"))));
+	    	record.click();
+	    	//searching our details in find patient page
+	    	WebElement search = driver.findElement(By.xpath("//input[@class='form-control']"));
+	    	search.sendKeys("abhi");
+	    	WebElement patient = driver.findElement(By.xpath("//tr[@class='odd']"));
+	    	patient.click();
+	    	
+	    	
+
+	        // click the 'edit' link 
+	        WebElement edit = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@target='_self']")));
+	        
+	        
+	        edit.click();
+	    	//validating details
+	    	//validate name 
+	        WebElement name = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@name='givenName']")));
+	        String text = name.getAttribute("value"); // Use getAttribute("value") for input fields to get the text
+	        if (text.equals("Abhi")) {
+	            System.out.println("Name was correct");
+	        } else {
+	            System.out.println("Name was wrong");
+	        }
+	        System.out.println("Name was validated");
+
+	        // Next button click
+	        WebElement next = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@class='confirm right']")));
+	        next.click();
+
+	        // Gender validation
+	        boolean valid = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//option[@value='M']"))).isEnabled();
+	        System.out.println(valid);
+	        next.click(); // Click "Next" again
+
+	        // D.O.B validation
+	        WebElement date = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@name='birthdateDay']")));
+	        String dayText = date.getAttribute("value"); // Get value for the date input
+	        WebElement year = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@name='birthdateYear']")));
+	        String yearText = year.getAttribute("value"); // Get value for the year input
+
+	        if (dayText.equals("21") && yearText.equals("2003")) {
+	            System.out.println("Correct date and year");
+	        } else {
+	            System.out.println("Wrong date and year");
+	        }
+	        System.out.println("D.O.B was validated");
+
+	        // Take a screenshot
+	        
+	        takeScreenshot(driver, "screenshot6.png");
+
+
+	        // Exit button click
+	        WebElement exit = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"exit-form-container\"]/a[2]")));
+	        exit.click();
+			
+			System.out.println("Scenario 3 was executed ......");
+	    	
+	    	
+	    }
+	    @Test(priority=4)
+	    
+	    void BookAppointment() throws InterruptedException {
+	    	//Scenario 4: Book an Appointment
+	    	//Book an appointment was clicked
+			driver.findElement(By.xpath("//a[@id='appointmentschedulingui-homeAppLink-appointmentschedulingui-homeAppLink-extension']")).click();
+			//Click on the ‘Manage Provider Schedules’
+			driver.findElement(By.xpath("//a[@id='appointmentschedulingui-scheduleProviders-app']")).click();
+			//Enter the details for book an appointment
+			WebElement dropdown = driver.findElement(By.xpath("//*[@id=\"filter-location\"]/select"));
+			Thread.sleep(5000);
+			Select drpdn = new Select(dropdown);
+			drpdn.selectByVisibleText("Registration Desk");
+			Thread.sleep(5000);
+			WebElement provider = driver.findElement(By.xpath("//input[@type='text']"));
+	    	provider.sendKeys("Jake");
+	    	List<WebElement> list = driver.findElements(By.xpath("//ul[@class='dropdown-menu ng-isolate-scope']"));
+	    	for(WebElement option : list) {
+	    		if(option.getText().equals("Jake Smith")) {
+	    			option.click();
+	    			break;
+	    		}
+	    		
+	    	}
+	    	System.out.println(" Book an Appointment was executed");	    	
+	    	Thread.sleep(5000);
+	    	WebElement service = driver.findElement(By.xpath("//input[@id='viewAppointmentBlock']"));
+	    	service.sendKeys("D");
+	    	List<WebElement> list1 = driver.findElements(By.xpath("//li[@ng-repeat='match in matches track by $index']"));
+	    	for(WebElement options : list1) {
+	    		if(options.getText().equals("Dermatology")) {
+	    			options.click();
+	    			break;
+	    		}
+	    	}
+	    	driver.findElement(By.xpath("//td[@data-date='2025-01-29']")).click();
+	    	WebElement services = driver.findElement(By.xpath("//input[@id='createAppointmentBlock']"));
+	    	services.sendKeys("D");
+	    	List<WebElement> list2 = driver.findElements(By.xpath("//a[@tabindex='-1']"));
+	    	for(WebElement optionall : list2) {
+	    		if(optionall.getText().equals("Dermatology")) {
+	    			optionall.click();
+	    			break;
+	    		}
+	    	}
+
+	        // Take a screenshot
+	        
+	        takeScreenshot(driver, "screenshot7.png");
+
+	    	Thread.sleep(3000);
+	    	driver.findElement(By.xpath("//button[@class='confirm']")).click();
+	    	System.out.println("Appointment was validated");
+	    	
+			System.out.println("Scenario four was executed.......");
+
+	    }
+	    
+	   
+	    	
+	    
+	    
+	   
+	    }
